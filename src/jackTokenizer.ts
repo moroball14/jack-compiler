@@ -11,7 +11,16 @@ export class JackTokenizer {
       // /** Expressionless version of projects/10/Square/Main.jack. */ というコメントもあるので、
       // /** と */ で囲まれたコメントを削除する
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    this.tokens = trimmedCommentContent.split(/\s+/);
+    console.log(trimmedCommentContent);
+    this.tokens = trimmedCommentContent
+      // todo: ダブルクォートで囲まれた文字列をトークンとして扱う
+      .split(/\s+/)
+      // 上記に加えて’{’|’}’|’(’|’)’|’[’|’]’|’.’| ’,’ | ’;’ | ’+’ | ’-’ | ’*’ | ’/’ | ’&’ | ’|’ | ’<’ | ’>’ | ’=’ | ’~’ も区切り文字として扱う
+      .flatMap((token) =>
+        token.split(/({|}|\(|\)|\[|\]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/)
+      )
+      .filter((token) => token !== "");
+    console.log(this.tokens);
   }
 
   public static init(content: string) {
@@ -19,7 +28,7 @@ export class JackTokenizer {
   }
 
   hasMoreTokens(): boolean {
-    return !!this.tokens[this.currentIndex + 1];
+    return this.tokens[this.currentIndex] !== undefined;
   }
 
   advance() {

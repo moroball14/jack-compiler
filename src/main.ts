@@ -1,7 +1,6 @@
 import { JackAnalyzer } from "./jackAnalyzer";
 import fs from "fs";
 
-// 「ts-node main.ts xxxx」のxxxxでディレクトリ名またはファイル名を受け取るmain関数
 function main() {
   // 引数を受け取る
   const args = process.argv.slice(2);
