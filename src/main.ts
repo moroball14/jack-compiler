@@ -1,4 +1,5 @@
-import { JackAnalyzer } from "./jack-analyzer";
+import { JackAnalyzer } from "./jackAnalyzer";
+import fs from "fs";
 
 // 「ts-node main.ts xxxx」のxxxxでディレクトリ名またはファイル名を受け取るmain関数
 function main() {
@@ -10,7 +11,25 @@ function main() {
     process.exit(1);
   }
 
-  const jackAnalyzer = JackAnalyzer.init(args[0]);
+  const path = args[0];
+
+  recursiveHandler(path, compileJackFile);
+}
+
+function recursiveHandler(path: string, handler: (filepath: string) => void) {
+  const stat = fs.statSync(path);
+  if (stat.isDirectory()) {
+    const files = fs.readdirSync(path);
+    files.forEach((file) => {
+      recursiveHandler(`${path}/${file}`, handler);
+    });
+  } else {
+    handler(path);
+  }
+}
+
+function compileJackFile(filepath: string) {
+  const jackAnalyzer = JackAnalyzer.init(filepath);
   jackAnalyzer.handle();
 }
 

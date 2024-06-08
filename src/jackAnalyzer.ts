@@ -1,3 +1,5 @@
+import fs from "fs";
+
 export class JackAnalyzer {
   private readonly filepath: string;
   private constructor(filepath: string) {
@@ -10,6 +12,7 @@ export class JackAnalyzer {
   }
 
   handle() {
+    const content = fs.readFileSync(this.filepath, "utf-8");
     // todo: tokenizerを生成
     // todo: xxx.jackファイルに対応するxxx.xmlファイルを生成
     // todo: compilationEngineを生成
