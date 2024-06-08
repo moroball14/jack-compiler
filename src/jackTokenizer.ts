@@ -1,3 +1,4 @@
+import { KeywordType } from "./types/keywordType";
 import { TokenType } from "./types/tokenType";
 
 export class JackTokenizer {
@@ -12,13 +13,12 @@ export class JackTokenizer {
     return new JackTokenizer(content);
   }
 
-  advance(): boolean {
-    console.log(this.tokens);
-    if (this.tokens[this.currentIndex + 1]) {
-      this.currentIndex++;
-      return true;
-    }
-    return false;
+  hasMoreTokens(): boolean {
+    return !!this.tokens[this.currentIndex + 1];
+  }
+
+  advance() {
+    this.currentIndex++;
   }
 
   tokenType(): TokenType {
@@ -77,6 +77,55 @@ export class JackTokenizer {
       return "STRING_CONST";
     } else {
       throw new Error("Invalid token");
+    }
+  }
+
+  keyword(): KeywordType {
+    const token = this.tokens[this.currentIndex];
+    if (token === "class") {
+      return "CLASS";
+    } else if (token === "constructor") {
+      return "CONSTRUCTOR";
+    } else if (token === "function") {
+      return "FUNCTION";
+    } else if (token === "method") {
+      return "METHOD";
+    } else if (token === "field") {
+      return "FIELD";
+    } else if (token === "static") {
+      return "STATIC";
+    } else if (token === "var") {
+      return "VAR";
+    } else if (token === "int") {
+      return "INT";
+    } else if (token === "char") {
+      return "CHAR";
+    } else if (token === "boolean") {
+      return "BOOLEAN";
+    } else if (token === "void") {
+      return "VOID";
+    } else if (token === "true") {
+      return "TRUE";
+    } else if (token === "false") {
+      return "FALSE";
+    } else if (token === "null") {
+      return "NULL";
+    } else if (token === "this") {
+      return "THIS";
+    } else if (token === "let") {
+      return "LET";
+    } else if (token === "do") {
+      return "DO";
+    } else if (token === "if") {
+      return "IF";
+    } else if (token === "else") {
+      return "ELSE";
+    } else if (token === "while") {
+      return "WHILE";
+    } else if (token === "return") {
+      return "RETURN";
+    } else {
+      throw new Error("Invalid keyword");
     }
   }
 }
