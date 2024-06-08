@@ -21,6 +21,10 @@ export class JackAnalyzer {
 
   handle() {
     const tokensFilePath = this.filepath.replace(".jack", "T.xml");
+    this.tokenize(tokensFilePath);
+  }
+
+  private tokenize(tokensFilePath: string) {
     const tokensWriteStream = fs.createWriteStream(tokensFilePath);
     tokensWriteStream.write("<tokens>\n");
     while (this.tokenizer.hasMoreTokens()) {
@@ -52,6 +56,7 @@ export class JackAnalyzer {
       this.tokenizer.advance();
     }
     tokensWriteStream.write("</tokens>\n");
+    tokensWriteStream.close();
   }
 
   private generateLexicalElement(tokenType: TokenType): string {
