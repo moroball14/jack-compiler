@@ -5,7 +5,12 @@ export class JackTokenizer {
   private readonly tokens: string[];
   private currentIndex = 0;
   private constructor(content: string) {
-    const trimmedCommentContent = content.replace(/\/\/.*$/gm, "");
+    const trimmedCommentContent = content
+      // // から行末までのコメントを削除
+      .replace(/\/\/.*$/gm, "")
+      // /** Expressionless version of projects/10/Square/Main.jack. */ というコメントもあるので、
+      // /** と */ で囲まれたコメントを削除する
+      .replace(/\/\*[\s\S]*?\*\//g, "");
     this.tokens = trimmedCommentContent.split(/\s+/);
   }
 
