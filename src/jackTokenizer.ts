@@ -13,13 +13,13 @@ export class JackTokenizer {
       .replace(/\/\*[\s\S]*?\*\//g, "");
     console.log(trimmedCommentContent);
     this.tokens = trimmedCommentContent
-      // todo: ダブルクォートで囲まれた文字列をトークンとして扱う
-      .split(/\s+/)
+      // ダブルクォートで囲まれた文字列 or \s+を区切り文字
+      .split(/(".*?"|\s+)/)
       // 上記に加えて’{’|’}’|’(’|’)’|’[’|’]’|’.’| ’,’ | ’;’ | ’+’ | ’-’ | ’*’ | ’/’ | ’&’ | ’|’ | ’<’ | ’>’ | ’=’ | ’~’ も区切り文字として扱う
       .flatMap((token) =>
         token.split(/({|}|\(|\)|\[|\]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/)
       )
-      .filter((token) => token !== "");
+      .filter((token) => token.trim() !== "");
     console.log(this.tokens);
   }
 
@@ -97,54 +97,64 @@ export class JackTokenizer {
   keyword(): KeywordType {
     const token = this.tokens[this.currentIndex];
     if (token === "class") {
-      return "CLASS";
+      return "class";
     } else if (token === "constructor") {
-      return "CONSTRUCTOR";
+      return "constructor";
     } else if (token === "function") {
-      return "FUNCTION";
+      return "function";
     } else if (token === "method") {
-      return "METHOD";
+      return "method";
     } else if (token === "field") {
-      return "FIELD";
+      return "field";
     } else if (token === "static") {
-      return "STATIC";
+      return "static";
     } else if (token === "var") {
-      return "VAR";
+      return "var";
     } else if (token === "int") {
-      return "INT";
+      return "int";
     } else if (token === "char") {
-      return "CHAR";
+      return "char";
     } else if (token === "boolean") {
-      return "BOOLEAN";
+      return "boolean";
     } else if (token === "void") {
-      return "VOID";
+      return "void";
     } else if (token === "true") {
-      return "TRUE";
+      return "true";
     } else if (token === "false") {
-      return "FALSE";
+      return "false";
     } else if (token === "null") {
-      return "NULL";
+      return "null";
     } else if (token === "this") {
-      return "THIS";
+      return "this";
     } else if (token === "let") {
-      return "LET";
+      return "let";
     } else if (token === "do") {
-      return "DO";
+      return "do";
     } else if (token === "if") {
-      return "IF";
+      return "if";
     } else if (token === "else") {
-      return "ELSE";
+      return "else";
     } else if (token === "while") {
-      return "WHILE";
+      return "while";
     } else if (token === "return") {
-      return "RETURN";
+      return "return";
     } else {
       throw new Error("Invalid keyword");
     }
   }
 
   symbol(): string {
-    return this.tokens[this.currentIndex];
+    const symbol = this.tokens[this.currentIndex];
+    if (symbol === "<") {
+      return "&lt;";
+    }
+    if (symbol === ">") {
+      return "&gt;";
+    }
+    if (symbol === "&") {
+      return "&amp;";
+    }
+    return symbol;
   }
 
   identifier(): string {
@@ -156,6 +166,7 @@ export class JackTokenizer {
   }
 
   stringVal(): string {
-    return this.tokens[this.currentIndex];
+    // 先頭と末尾のダブルクォートを除去して返す
+    return this.tokens[this.currentIndex].replace(/^"|"$/g, "");
   }
 }

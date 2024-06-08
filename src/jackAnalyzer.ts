@@ -45,20 +45,22 @@ export class JackAnalyzer {
         default:
           throw new Error("Invalid token type");
       }
+      const lexicalElement = this.generateLexicalElement(tokenType);
       tokensWriteStream.write(
-        `<${tokenType.toLowerCase()}> ${value} </${tokenType.toLowerCase()}>\n`
+        `<${lexicalElement}> ${value} </${lexicalElement}>\n`
       );
       this.tokenizer.advance();
     }
     tokensWriteStream.write("</tokens>\n");
   }
-}
 
-// 方針1: analyzerの中でtokenizerでトークンを一つずつ呼び出し、それをcompilationEngineに渡す
-// // メリット: トークンを一つずつ処理するので、トークンの種類に応じて処理を変えやすい
-// // デメリット: トークンの種類に応じた処理をcompilationEngineに書かないといけない & トークンの種類に応じて処理を呼び出すのでjack analyzerの中でif文が多くなる
-// 方針2: compileEngineの中でtokenizerを呼び出し、tokenizerからトークンを一つずつ取得する
-// // メリット: トークンの種類に応じた処理をcompilationEngineに書ける & jack analyzerの中でif文が少なくなる
-// // デメリット: compileEngineはtokenizerに依存してしまう
-// 方針3: tokenizerを受け取ってcompileEngineの処理を出しわけする層を作る
-// // メリット: tokenizerとcompileEngineの依存をなくすことができる
+  private generateLexicalElement(tokenType: TokenType): string {
+    if (tokenType === "INT_CONST") {
+      return "integerConstant";
+    }
+    if (tokenType === "STRING_CONST") {
+      return "stringConstant";
+    }
+    return tokenType.toLowerCase();
+  }
+}

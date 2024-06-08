@@ -86,5 +86,11 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": ["src"],
-  "exclude": ["node_moduels", "jest.config.ts", "dist"]
+  "exclude": [
+    "node_moduels",
+    "jest.config.ts",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }
