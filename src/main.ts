@@ -28,6 +28,10 @@ function recursiveHandler(path: string, handler: (filepath: string) => void) {
 }
 
 function compileJackFile(filepath: string) {
+  if (!filepath.endsWith(".jack")) {
+    console.log(`skip ${filepath}`);
+    return;
+  }
   const jackAnalyzer = JackAnalyzer.init(filepath);
   jackAnalyzer.handle();
 }
