@@ -128,4 +128,20 @@ export class JackTokenizer {
       throw new Error("Invalid keyword");
     }
   }
+
+  symbol(): string {
+    return this.tokens[this.currentIndex];
+  }
+
+  identifier(): string {
+    return this.tokens[this.currentIndex];
+  }
+
+  intVal(): number {
+    return Number(this.tokens[this.currentIndex]);
+  }
+
+  stringVal(): string {
+    return this.tokens[this.currentIndex];
+  }
 }
