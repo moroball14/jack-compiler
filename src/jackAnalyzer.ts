@@ -1,6 +1,7 @@
 import fs from "fs";
 import { JackTokenizer } from "./jackTokenizer";
 import { TokenType } from "./types/tokenType";
+import { CompilationEngine } from "./compilationEngine";
 
 export class JackAnalyzer {
   private readonly filepath: string;
@@ -22,6 +23,14 @@ export class JackAnalyzer {
   handle() {
     const tokensFilePath = this.filepath.replace(".jack", "T.xml");
     this.tokenize(tokensFilePath);
+    const content = fs.readFileSync(tokensFilePath, "utf-8");
+    const compiledFilePath = tokensFilePath.replace("T.xml", ".xml");
+    const writeStream = fs.createWriteStream(compiledFilePath);
+    const compilationEngine = CompilationEngine.init({
+      content,
+      writeStream,
+    });
+    compilationEngine.compileClass();
   }
 
   private tokenize(tokensFilePath: string) {
