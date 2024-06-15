@@ -73,6 +73,12 @@ const KEYWORDS = {
   constructor: "<keyword> constructor </keyword>",
   method: "<keyword> method </keyword>",
   var: "<keyword> var </keyword>",
+  let: "<keyword> let </keyword>",
+  if: "<keyword> if </keyword>",
+  while: "<keyword> while </keyword>",
+  do: "<keyword> do </keyword>",
+  return: "<keyword> return </keyword>",
+  else: "<keyword> else </keyword>",
 };
 
 const SYMBOLS = {
@@ -196,7 +202,104 @@ export class CompilationEngine {
   }
 
   private compileStatements() {
-    // implement
+    this.writeStream.write(`${this.indentSpace()}<statements>\n`);
+    this.plusIndent();
+    while (this.tokens[this.currentTokenIndex] !== "<symbol> } </symbol>") {
+      // todo: この条件が正しいか確認
+      switch (this.tokens[this.currentTokenIndex]) {
+        case KEYWORDS.let:
+          this.compileLet();
+          break;
+        case KEYWORDS.if:
+          this.compileIf();
+          break;
+        case KEYWORDS.while:
+          this.compileWhile();
+          break;
+        case KEYWORDS.do:
+          this.compileDo();
+          break;
+        case KEYWORDS.return:
+          this.compileReturn();
+          break;
+      }
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</statements>\n`);
+  }
+
+  private compileLet() {
+    this.writeStream.write(`${this.indentSpace()}<letStatement>\n`);
+    this.plusIndent();
+    this.writeCurrentLine();
+    this.writeCurrentLine();
+    if (this.tokens[this.currentTokenIndex] === "<symbol> [ </symbol>") {
+      this.writeCurrentLine();
+      // this.compileExpression();
+      this.writeCurrentLine(); // ] が来るはず
+    }
+    this.writeCurrentLine(); // = が来るはず
+    // this.compileExpression();
+    this.writeCurrentLine(); // ; が来るはず
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</letStatement>\n`);
+  }
+
+  private compileIf() {
+    this.writeStream.write(`${this.indentSpace()}<ifStatement>\n`);
+    this.plusIndent();
+    this.writeCurrentLine();
+    this.writeCurrentLine(); // ( が来るはず
+    // this.compileExpression();
+    this.writeCurrentLine(); // ) が来るはず
+    this.writeCurrentLine(); // { が来るはず
+    this.compileStatements();
+    this.writeCurrentLine(); // } が来るはず
+    if (this.tokens[this.currentTokenIndex] === KEYWORDS.else) {
+      this.writeCurrentLine();
+      this.writeCurrentLine(); // { が来るはず
+      this.compileStatements();
+      this.writeCurrentLine(); // } が来るはず
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</ifStatement>\n`);
+  }
+
+  private compileWhile() {
+    this.writeStream.write(`${this.indentSpace()}<whileStatement>\n`);
+    this.plusIndent();
+    this.writeCurrentLine();
+    this.writeCurrentLine(); // ( が来るはず
+    // this.compileExpression();
+    this.writeCurrentLine(); // ) が来るはず
+    this.writeCurrentLine(); // { が来るはず
+    this.compileStatements();
+    this.writeCurrentLine(); // } が来るはず
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</whileStatement>\n`);
+  }
+
+  private compileDo() {
+    this.writeStream.write(`${this.indentSpace()}<doStatement>\n`);
+    this.plusIndent();
+    this.writeCurrentLine();
+    // this.compileSubroutineCall();
+    this.writeCurrentLine(); // ; が来るはず
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</doStatement>\n`);
+  }
+
+  private compileReturn() {
+    this.writeStream.write(`${this.indentSpace()}<returnStatement>\n`);
+    this.plusIndent();
+    this.writeCurrentLine();
+    if (this.tokens[this.currentTokenIndex] !== "<symbol> ; </symbol>") {
+      // todo: この条件が正しいか確認
+      // this.compileExpression();
+    }
+    this.writeCurrentLine(); // ; が来るはず
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</returnStatement>\n`);
   }
 
   private plusIndent() {
