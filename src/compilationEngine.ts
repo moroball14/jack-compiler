@@ -69,10 +69,15 @@ import fs from "fs";
 const KEYWORDS = {
   static: "<keyword> static </keyword>",
   field: "<keyword> field </keyword>",
+  function: "<keyword> function </keyword>",
+  constructor: "<keyword> constructor </keyword>",
+  method: "<keyword> method </keyword>",
+  var: "<keyword> var </keyword>",
 };
 
 const SYMBOLS = {
   comma: "<symbol> , </symbol>",
+  closeParen: "<symbol> ) </symbol>",
 };
 
 export class CompilationEngine {
@@ -101,7 +106,7 @@ export class CompilationEngine {
     this.writeCurrentLine();
     this.writeCurrentLine();
     this.compileClassVarDec();
-    // this.compileSubroutineDec();
+    this.compileSubroutineDec();
     this.writeCurrentLine(); // classの閉じタグが来る想定
     this.minusIndent();
     this.writeStream.write("</class>\n");
@@ -126,6 +131,72 @@ export class CompilationEngine {
       this.minusIndent();
       this.writeStream.write(`${this.indentSpace()}</classVarDec>\n`);
     }
+  }
+
+  private compileSubroutineDec() {
+    while (
+      this.tokens[this.currentTokenIndex] === KEYWORDS.function ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.method ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.constructor
+    ) {
+      this.writeStream.write(`${this.indentSpace()}<subroutineDec>\n`);
+      this.plusIndent();
+      this.writeCurrentLine();
+      this.writeCurrentLine();
+      this.writeCurrentLine();
+      this.writeCurrentLine(); // ここは ( が来るはず
+      this.compileParameterList();
+      this.writeCurrentLine(); // ここは ) が来るはず
+      this.compileSubroutineBody();
+      this.minusIndent();
+      this.writeStream.write(`${this.indentSpace()}</subroutineDec>\n`);
+    }
+  }
+
+  private compileParameterList() {
+    this.writeStream.write(`${this.indentSpace()}<parameterList>\n`);
+    this.plusIndent();
+    while (this.tokens[this.currentTokenIndex] !== SYMBOLS.closeParen) {
+      this.writeCurrentLine();
+      this.writeCurrentLine();
+      if (this.tokens[this.currentTokenIndex] === SYMBOLS.comma) {
+        this.writeCurrentLine();
+      }
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</parameterList>\n`);
+  }
+
+  private compileSubroutineBody() {
+    this.writeStream.write(`${this.indentSpace()}<subroutineBody>\n`);
+    this.plusIndent();
+    this.writeCurrentLine(); // { が来るはず
+    this.compileVarDec();
+    this.compileStatements();
+    this.writeCurrentLine(); // } が来るはず
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</subroutineBody>\n`);
+  }
+
+  private compileVarDec() {
+    while (this.tokens[this.currentTokenIndex] === KEYWORDS.var) {
+      this.writeStream.write(`${this.indentSpace()}<varDec>\n`);
+      this.plusIndent();
+      this.writeCurrentLine();
+      this.writeCurrentLine();
+      this.writeCurrentLine();
+      while (this.tokens[this.currentTokenIndex] === SYMBOLS.comma) {
+        this.writeCurrentLine();
+        this.writeCurrentLine();
+      }
+      this.writeCurrentLine(); // ここが<symbol> ; </symbol>のはず
+      this.minusIndent();
+      this.writeStream.write(`${this.indentSpace()}</varDec>\n`);
+    }
+  }
+
+  private compileStatements() {
+    // implement
   }
 
   private plusIndent() {
