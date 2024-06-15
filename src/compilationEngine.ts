@@ -208,19 +208,19 @@ export class CompilationEngine {
       // todo: この条件が正しいか確認
       switch (this.tokens[this.currentTokenIndex]) {
         case KEYWORDS.let:
-          this.compileLet();
+          this.compileLetStatement();
           break;
         case KEYWORDS.if:
-          this.compileIf();
+          this.compileIfStatement();
           break;
         case KEYWORDS.while:
-          this.compileWhile();
+          this.compileWhileStatement();
           break;
         case KEYWORDS.do:
-          this.compileDo();
+          this.compileDoStatement();
           break;
         case KEYWORDS.return:
-          this.compileReturn();
+          this.compileReturnStatement();
           break;
       }
     }
@@ -228,7 +228,7 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}</statements>\n`);
   }
 
-  private compileLet() {
+  private compileLetStatement() {
     this.writeStream.write(`${this.indentSpace()}<letStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
@@ -245,7 +245,7 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}</letStatement>\n`);
   }
 
-  private compileIf() {
+  private compileIfStatement() {
     this.writeStream.write(`${this.indentSpace()}<ifStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
@@ -265,7 +265,7 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}</ifStatement>\n`);
   }
 
-  private compileWhile() {
+  private compileWhileStatement() {
     this.writeStream.write(`${this.indentSpace()}<whileStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
@@ -279,7 +279,7 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}</whileStatement>\n`);
   }
 
-  private compileDo() {
+  private compileDoStatement() {
     this.writeStream.write(`${this.indentSpace()}<doStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
@@ -289,7 +289,7 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}</doStatement>\n`);
   }
 
-  private compileReturn() {
+  private compileReturnStatement() {
     this.writeStream.write(`${this.indentSpace()}<returnStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
