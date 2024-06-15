@@ -1,71 +1,5 @@
 import fs from "fs";
 
-// contentの例
-// <tokens>
-// <keyword> class </keyword>
-// <identifier> Main </identifier>
-// <symbol> { </symbol>
-// <keyword> static </keyword>
-// <keyword> boolean </keyword>
-// <identifier> test </identifier>
-// <symbol> ; </symbol>
-// <keyword> function </keyword>
-// <keyword> void </keyword>
-// <identifier> main </identifier>
-// <symbol> ( </symbol>
-// <symbol> ) </symbol>
-// <symbol> { </symbol>
-// <keyword> var </keyword>
-// <identifier> SquareGame </identifier>
-// <identifier> game </identifier>
-// <symbol> ; </symbol>
-// <keyword> let </keyword>
-// <identifier> game </identifier>
-// <symbol> = </symbol>
-// <identifier> game </identifier>
-// <symbol> ; </symbol>
-// <keyword> do </keyword>
-// <identifier> game </identifier>
-// <symbol> . </symbol>
-// <identifier> run </identifier>
-// <symbol> ( </symbol>
-// <symbol> ) </symbol>
-// <symbol> ; </symbol>
-// <keyword> do </keyword>
-// <identifier> game </identifier>
-// <symbol> . </symbol>
-// <identifier> dispose </identifier>
-// <symbol> ( </symbol>
-// <symbol> ) </symbol>
-// <symbol> ; </symbol>
-// <keyword> return </keyword>
-// <symbol> ; </symbol>
-// <symbol> } </symbol>
-// <keyword> function </keyword>
-// <keyword> void </keyword>
-// <identifier> more </identifier>
-// <symbol> ( </symbol>
-// <symbol> ) </symbol>
-// <symbol> { </symbol>
-// <keyword> var </keyword>
-// <keyword> boolean </keyword>
-// <identifier> b </identifier>
-// <symbol> ; </symbol>
-// <keyword> if </keyword>
-// <symbol> ( </symbol>
-// <identifier> b </identifier>
-// <symbol> ) </symbol>
-// <symbol> { </symbol>
-// <symbol> } </symbol>
-// <keyword> else </keyword>
-// <symbol> { </symbol>
-// <symbol> } </symbol>
-// <keyword> return </keyword>
-// <symbol> ; </symbol>
-// <symbol> } </symbol>
-// <symbol> } </symbol>
-// </tokens>
-
 const KEYWORDS = {
   static: "<keyword> static </keyword>",
   field: "<keyword> field </keyword>",
@@ -83,7 +17,24 @@ const KEYWORDS = {
 
 const SYMBOLS = {
   comma: "<symbol> , </symbol>",
+  semicolon: "<symbol> ; </symbol>",
+  openParen: "<symbol> ( </symbol>",
   closeParen: "<symbol> ) </symbol>",
+  openBracket: "<symbol> [ </symbol>",
+  closeBracket: "<symbol> ] </symbol>",
+  openBrace: "<symbol> { </symbol>",
+  closeBrace: "<symbol> } </symbol>",
+  plus: "<symbol> + </symbol>",
+  minus: "<symbol> - </symbol>",
+  star: "<symbol> * </symbol>",
+  slash: "<symbol> / </symbol>",
+  ampersand: "<symbol> &amp; </symbol>",
+  verticalBar: "<symbol> | </symbol>",
+  lessThan: "<symbol> &lt; </symbol>",
+  greaterThan: "<symbol> &gt; </symbol>",
+  equal: "<symbol> = </symbol>",
+  tilde: "<symbol> ~ </symbol>",
+  dot: "<symbol> . </symbol>",
 };
 
 export class CompilationEngine {
@@ -133,7 +84,7 @@ export class CompilationEngine {
         this.writeCurrentLine();
         this.writeCurrentLine();
       }
-      this.writeCurrentLine(); // ここが<symbol> ; </symbol>のはず
+      this.writeCurrentLine(); // ; が来る
       this.minusIndent();
       this.writeStream.write(`${this.indentSpace()}</classVarDec>\n`);
     }
@@ -150,9 +101,9 @@ export class CompilationEngine {
       this.writeCurrentLine();
       this.writeCurrentLine();
       this.writeCurrentLine();
-      this.writeCurrentLine(); // ここは ( が来るはず
+      this.writeCurrentLine(); // ここは `(`
       this.compileParameterList();
-      this.writeCurrentLine(); // ここは ) が来るはず
+      this.writeCurrentLine(); // ここは `)`
       this.compileSubroutineBody();
       this.minusIndent();
       this.writeStream.write(`${this.indentSpace()}</subroutineDec>\n`);
@@ -176,10 +127,10 @@ export class CompilationEngine {
   private compileSubroutineBody() {
     this.writeStream.write(`${this.indentSpace()}<subroutineBody>\n`);
     this.plusIndent();
-    this.writeCurrentLine(); // { が来るはず
+    this.writeCurrentLine(); // `{`
     this.compileVarDec();
     this.compileStatements();
-    this.writeCurrentLine(); // } が来るはず
+    this.writeCurrentLine(); // `}`
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</subroutineBody>\n`);
   }
@@ -195,7 +146,7 @@ export class CompilationEngine {
         this.writeCurrentLine();
         this.writeCurrentLine();
       }
-      this.writeCurrentLine(); // ここが<symbol> ; </symbol>のはず
+      this.writeCurrentLine(); // `;`
       this.minusIndent();
       this.writeStream.write(`${this.indentSpace()}</varDec>\n`);
     }
@@ -204,8 +155,13 @@ export class CompilationEngine {
   private compileStatements() {
     this.writeStream.write(`${this.indentSpace()}<statements>\n`);
     this.plusIndent();
-    while (this.tokens[this.currentTokenIndex] !== "<symbol> } </symbol>") {
-      // todo: この条件が正しいか確認
+    while (
+      this.tokens[this.currentTokenIndex] === KEYWORDS.let ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.if ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.while ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.do ||
+      this.tokens[this.currentTokenIndex] === KEYWORDS.return
+    ) {
       switch (this.tokens[this.currentTokenIndex]) {
         case KEYWORDS.let:
           this.compileLetStatement();
@@ -233,14 +189,14 @@ export class CompilationEngine {
     this.plusIndent();
     this.writeCurrentLine();
     this.writeCurrentLine();
-    if (this.tokens[this.currentTokenIndex] === "<symbol> [ </symbol>") {
+    if (this.tokens[this.currentTokenIndex] === SYMBOLS.openBracket) {
       this.writeCurrentLine();
-      // this.compileExpression();
+      this.compileExpression();
       this.writeCurrentLine(); // ] が来るはず
     }
-    this.writeCurrentLine(); // = が来るはず
-    // this.compileExpression();
-    this.writeCurrentLine(); // ; が来るはず
+    this.writeCurrentLine(); // `=`
+    this.compileExpression();
+    this.writeCurrentLine(); // `;`
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</letStatement>\n`);
   }
@@ -249,17 +205,17 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}<ifStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
-    this.writeCurrentLine(); // ( が来るはず
-    // this.compileExpression();
-    this.writeCurrentLine(); // ) が来るはず
-    this.writeCurrentLine(); // { が来るはず
+    this.writeCurrentLine(); // `(`
+    this.compileExpression();
+    this.writeCurrentLine(); // `)`
+    this.writeCurrentLine(); // `{`
     this.compileStatements();
-    this.writeCurrentLine(); // } が来るはず
+    this.writeCurrentLine(); // `}`
     if (this.tokens[this.currentTokenIndex] === KEYWORDS.else) {
       this.writeCurrentLine();
-      this.writeCurrentLine(); // { が来るはず
+      this.writeCurrentLine(); // `{`
       this.compileStatements();
-      this.writeCurrentLine(); // } が来るはず
+      this.writeCurrentLine(); // `}`
     }
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</ifStatement>\n`);
@@ -269,12 +225,12 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}<whileStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
-    this.writeCurrentLine(); // ( が来るはず
-    // this.compileExpression();
-    this.writeCurrentLine(); // ) が来るはず
-    this.writeCurrentLine(); // { が来るはず
+    this.writeCurrentLine(); // `(`
+    this.compileExpression();
+    this.writeCurrentLine(); // `)`
+    this.writeCurrentLine(); // `{`
     this.compileStatements();
-    this.writeCurrentLine(); // } が来るはず
+    this.writeCurrentLine(); // `}`
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</whileStatement>\n`);
   }
@@ -283,8 +239,8 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}<doStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
-    // this.compileSubroutineCall();
-    this.writeCurrentLine(); // ; が来るはず
+    this.compileSubroutineCall();
+    this.writeCurrentLine(); // `;`
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</doStatement>\n`);
   }
@@ -293,13 +249,95 @@ export class CompilationEngine {
     this.writeStream.write(`${this.indentSpace()}<returnStatement>\n`);
     this.plusIndent();
     this.writeCurrentLine();
-    if (this.tokens[this.currentTokenIndex] !== "<symbol> ; </symbol>") {
-      // todo: この条件が正しいか確認
-      // this.compileExpression();
+    if (this.tokens[this.currentTokenIndex] !== SYMBOLS.semicolon) {
+      this.compileExpression();
     }
-    this.writeCurrentLine(); // ; が来るはず
+    this.writeCurrentLine(); // `;`
     this.minusIndent();
     this.writeStream.write(`${this.indentSpace()}</returnStatement>\n`);
+  }
+
+  private compileExpression() {
+    this.writeStream.write(`${this.indentSpace()}<expression>\n`);
+    this.plusIndent();
+    this.compileTerm();
+    while (
+      this.tokens[this.currentTokenIndex] === SYMBOLS.plus ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.minus ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.star ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.slash ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.ampersand ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.verticalBar ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.lessThan ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.greaterThan ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.equal
+    ) {
+      this.writeCurrentLine();
+      this.compileTerm();
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</expression>\n`);
+  }
+
+  private compileTerm() {
+    this.writeStream.write(`${this.indentSpace()}<term>\n`);
+    this.plusIndent();
+    if (this.tokens[this.currentTokenIndex] === SYMBOLS.openParen) {
+      this.writeCurrentLine();
+      this.compileExpression();
+      this.writeCurrentLine(); // `)`
+    } else if (
+      this.tokens[this.currentTokenIndex] === SYMBOLS.minus ||
+      this.tokens[this.currentTokenIndex] === SYMBOLS.tilde
+    ) {
+      this.writeCurrentLine();
+      this.compileTerm();
+    } else if (
+      this.tokens[this.currentTokenIndex + 1] === SYMBOLS.openParen ||
+      this.tokens[this.currentTokenIndex + 1] === SYMBOLS.dot
+    ) {
+      this.compileSubroutineCall();
+    } else if (
+      this.tokens[this.currentTokenIndex + 1] === SYMBOLS.openBracket
+    ) {
+      this.writeCurrentLine();
+      this.writeCurrentLine(); // `[`
+      this.compileExpression();
+      this.writeCurrentLine(); // `]`
+    } else {
+      this.writeCurrentLine();
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</term>\n`);
+  }
+
+  private compileSubroutineCall() {
+    this.writeCurrentLine();
+    if (this.tokens[this.currentTokenIndex] === SYMBOLS.dot) {
+      this.writeCurrentLine();
+      this.writeCurrentLine(); // subroutineName
+      this.writeCurrentLine(); // `(`
+      this.compileExpressionList();
+      this.writeCurrentLine(); // `)`
+    } else {
+      // 厳密にはthis.tokens[this.currentTokenIndex] === SYMBOLS.openParen
+      this.writeCurrentLine(); // `(`
+      this.compileExpressionList();
+      this.writeCurrentLine(); // `)`
+    }
+  }
+
+  private compileExpressionList() {
+    this.writeStream.write(`${this.indentSpace()}<expressionList>\n`);
+    this.plusIndent();
+    while (this.tokens[this.currentTokenIndex] !== SYMBOLS.closeParen) {
+      this.compileExpression();
+      if (this.tokens[this.currentTokenIndex] === SYMBOLS.comma) {
+        this.writeCurrentLine();
+      }
+    }
+    this.minusIndent();
+    this.writeStream.write(`${this.indentSpace()}</expressionList>\n`);
   }
 
   private plusIndent() {
