@@ -1,17 +1,19 @@
+import fs from "fs";
 import { KeywordType } from "./types/keywordType";
 import { TokenType } from "./types/tokenType";
 
 export class JackTokenizer {
   private readonly tokens: string[];
+  private readonly writeStream: fs.WriteStream;
   private currentIndex = 0;
-  private constructor(content: string) {
+  private constructor(content: string, writeStream: fs.WriteStream) {
+    this.writeStream = writeStream;
     const trimmedCommentContent = content
       // // から行末までのコメントを削除
       .replace(/\/\/.*$/gm, "")
       // /** Expressionless version of projects/10/Square/Main.jack. */ というコメントもあるので、
       // /** と */ で囲まれたコメントを削除する
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    console.log(trimmedCommentContent);
     this.tokens = trimmedCommentContent
       // ダブルクォートで囲まれた文字列 or \s+を区切り文字
       .split(/(".*?"|\s+)/)
@@ -20,11 +22,55 @@ export class JackTokenizer {
         token.split(/({|}|\(|\)|\[|\]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/)
       )
       .filter((token) => token.trim() !== "");
-    console.log(this.tokens);
   }
 
-  public static init(content: string) {
-    return new JackTokenizer(content);
+  public static init(content: string, writeStream: fs.WriteStream) {
+    return new JackTokenizer(content, writeStream);
+  }
+
+  handle() {
+    console.log(this.tokens);
+    this.writeStream.write("<tokens>\n");
+    while (this.hasMoreTokens()) {
+      const tokenType = this.tokenType();
+      let value: string;
+      switch (tokenType) {
+        case "KEYWORD":
+          value = this.keyword();
+          break;
+        case "SYMBOL":
+          value = this.symbol();
+          break;
+        case "IDENTIFIER":
+          value = this.identifier();
+          break;
+        case "INT_CONST":
+          value = this.intVal().toString();
+          break;
+        case "STRING_CONST":
+          value = this.stringVal();
+          break;
+        default:
+          throw new Error("Invalid token type");
+      }
+      const lexicalElement = this.generateLexicalElement(tokenType);
+      this.writeStream.write(
+        `<${lexicalElement}> ${value} </${lexicalElement}>\n`
+      );
+      this.advance();
+    }
+    this.writeStream.write("</tokens>\n");
+    this.writeStream.close();
+  }
+
+  private generateLexicalElement(tokenType: TokenType): string {
+    if (tokenType === "INT_CONST") {
+      return "integerConstant";
+    }
+    if (tokenType === "STRING_CONST") {
+      return "stringConstant";
+    }
+    return tokenType.toLowerCase();
   }
 
   hasMoreTokens(): boolean {
