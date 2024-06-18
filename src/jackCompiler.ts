@@ -2,7 +2,7 @@ import fs from "fs";
 import { JackTokenizer } from "./jackTokenizer";
 import { CompilationEngine } from "./compilationEngine";
 
-export class JackAnalyzer {
+export class JackCompiler {
   private readonly filepath: string;
   private constructor(filepath: string) {
     this.filepath = filepath;
@@ -13,7 +13,7 @@ export class JackAnalyzer {
       console.error(`${filepath} is not a .jack file`);
       process.exit(1);
     }
-    return new JackAnalyzer(filepath);
+    return new JackCompiler(filepath);
   }
 
   handle() {

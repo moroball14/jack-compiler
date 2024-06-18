@@ -1,4 +1,4 @@
-import { JackAnalyzer } from "./jackAnalyzer";
+import { JackCompiler } from "./jackCompiler";
 import fs from "fs";
 
 function main() {
@@ -32,7 +32,7 @@ function compileJackFile(filepath: string) {
     console.log(`skip ${filepath}`);
     return;
   }
-  const jackAnalyzer = JackAnalyzer.init(filepath);
+  const jackAnalyzer = JackCompiler.init(filepath);
   jackAnalyzer.handle();
 }
 
